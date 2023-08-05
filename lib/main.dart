@@ -1,19 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:localizations/src/core/locale_storage/app_storage_pod.dart';
 import 'package:localizations/src/l10n/l10n.dart';
+import 'package:localizations/src/shared/pods/locale_pod.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  List<Override> overrides = const [];
+  await Hive.initFlutter();
+  final appBox = await Hive.openBox('appBox');
+  runApp(ProviderScope(overrides: [
+    appBoxProvider.overrideWithValue(appBox),
+    // ...overrides,
+  ], child: const MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localePod);
     return MaterialApp(
       title: 'Localization',
-      locale: const Locale('hi'),
+      locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate, // Add this line
         GlobalMaterialLocalizations.delegate,
@@ -34,20 +51,45 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class Home extends StatefulWidget {
+class Home extends ConsumerStatefulWidget {
   const Home({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  ConsumerState<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends ConsumerState<Home> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.hello),
+        centerTitle: true,
+        title: Text(
+          l10n.hello,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 50),
+        ),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FilledButton(
+                onPressed: () {
+                  ref
+                      .read(localePod.notifier)
+                      .changeLocale(locale: const Locale('en'));
+                },
+                child: const Text("english")),
+            FilledButton(
+                onPressed: () {
+                  ref
+                      .read(localePod.notifier)
+                      .changeLocale(locale: const Locale('hi'));
+                },
+                child: const Text("Hindi"))
+          ],
+        ),
       ),
     );
   }
