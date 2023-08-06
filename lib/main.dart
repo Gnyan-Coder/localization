@@ -5,6 +5,7 @@ import 'package:localizations/src/core/locale_storage/app_storage_pod.dart';
 import 'package:localizations/src/core/them/app_them.dart';
 import 'package:localizations/src/core/them/them_controller.dart';
 import 'package:localizations/src/l10n/l10n.dart';
+import 'package:localizations/src/shared/helper/global_helper.dart';
 import 'package:localizations/src/shared/pods/locale_pod.dart';
 
 Future<void> main() async {
@@ -29,7 +30,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
     final currenttheme = ref.watch(themecontrollerProvider);
-    print(currenttheme);
+
     final locale = ref.watch(localePod);
     return MaterialApp(
       title: 'Localization',
@@ -39,35 +40,6 @@ class _MyAppState extends ConsumerState<MyApp> {
       darkTheme: Themes.darkTheme,
       themeMode: currenttheme,
       theme: Themes.lightTheme,
-
-      // builder: (context, child) {
-      //   if (mounted) {
-      //     child = AnnotatedRegion<SystemUiOverlayStyle>(
-      //       value: currenttheme == ThemeMode.dark
-      //           ? SystemUiOverlayStyle.light.copyWith(
-      //               statusBarColor: Colors.white.withOpacity(0.4),
-      //               systemNavigationBarColor: Colors.black,
-      //               systemNavigationBarDividerColor: Colors.black,
-      //               systemNavigationBarIconBrightness: Brightness.dark,
-      //             )
-      //           : currenttheme == ThemeMode.light
-      //               ? SystemUiOverlayStyle.dark.copyWith(
-      //                   statusBarColor: Colors.white.withOpacity(0.4),
-      //                   systemNavigationBarColor: Colors.grey,
-      //                   systemNavigationBarDividerColor: Colors.grey,
-      //                   systemNavigationBarIconBrightness: Brightness.light,
-      //                 )
-      //               : SystemUiOverlayStyle.dark.copyWith(
-      //                   statusBarColor: Colors.white.withOpacity(0.4),
-      //                   systemNavigationBarColor: Colors.grey,
-      //                   systemNavigationBarDividerColor: Colors.grey,
-      //                   systemNavigationBarIconBrightness: Brightness.light,
-      //                 ),
-      //       child: widget,
-      //     );
-      //   }
-      //   return const Home();
-      // },
       home: const Home(),
       debugShowCheckedModeBanner: false,
     );
@@ -81,7 +53,8 @@ class Home extends ConsumerStatefulWidget {
   ConsumerState<Home> createState() => _HomeState();
 }
 
-class _HomeState extends ConsumerState<Home> {
+class _HomeState extends ConsumerState<Home>
+    with GlobalHelper<Home>, TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -115,6 +88,10 @@ class _HomeState extends ConsumerState<Home> {
                   ref
                       .read(themecontrollerProvider.notifier)
                       .changeTheme(theme: ThemeMode.dark);
+                  showCProgressOverlay(
+                    context: context,
+                    vsync: this,
+                  );
                 },
                 child: const Text("Hindi"))
           ],
