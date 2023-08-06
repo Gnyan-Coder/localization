@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:localizations/src/core/locale_storage/app_storage_pod.dart';
+import 'package:localizations/src/core/them/app_them.dart';
+import 'package:localizations/src/core/them/them_controller.dart';
 import 'package:localizations/src/l10n/l10n.dart';
 import 'package:localizations/src/shared/pods/locale_pod.dart';
 
@@ -13,7 +14,7 @@ Future<void> main() async {
   final appBox = await Hive.openBox('appBox');
   runApp(ProviderScope(overrides: [
     appBoxProvider.overrideWithValue(appBox),
-    // ...overrides,
+    ...overrides,
   ], child: const MyApp()));
 }
 
@@ -27,26 +28,48 @@ class MyApp extends ConsumerStatefulWidget {
 class _MyAppState extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
+    final currenttheme = ref.watch(themecontrollerProvider);
+    print(currenttheme);
     final locale = ref.watch(localePod);
     return MaterialApp(
       title: 'Localization',
       locale: locale,
-      localizationsDelegates: const [
-        AppLocalizations.delegate, // Add this line
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('en'), // English
-        Locale('hi'), // Hindi
-      ],
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      darkTheme: Themes.darkTheme,
+      themeMode: currenttheme,
+      theme: Themes.lightTheme,
+
+      // builder: (context, child) {
+      //   if (mounted) {
+      //     child = AnnotatedRegion<SystemUiOverlayStyle>(
+      //       value: currenttheme == ThemeMode.dark
+      //           ? SystemUiOverlayStyle.light.copyWith(
+      //               statusBarColor: Colors.white.withOpacity(0.4),
+      //               systemNavigationBarColor: Colors.black,
+      //               systemNavigationBarDividerColor: Colors.black,
+      //               systemNavigationBarIconBrightness: Brightness.dark,
+      //             )
+      //           : currenttheme == ThemeMode.light
+      //               ? SystemUiOverlayStyle.dark.copyWith(
+      //                   statusBarColor: Colors.white.withOpacity(0.4),
+      //                   systemNavigationBarColor: Colors.grey,
+      //                   systemNavigationBarDividerColor: Colors.grey,
+      //                   systemNavigationBarIconBrightness: Brightness.light,
+      //                 )
+      //               : SystemUiOverlayStyle.dark.copyWith(
+      //                   statusBarColor: Colors.white.withOpacity(0.4),
+      //                   systemNavigationBarColor: Colors.grey,
+      //                   systemNavigationBarDividerColor: Colors.grey,
+      //                   systemNavigationBarIconBrightness: Brightness.light,
+      //                 ),
+      //       child: widget,
+      //     );
+      //   }
+      //   return const Home();
+      // },
       home: const Home(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -79,6 +102,9 @@ class _HomeState extends ConsumerState<Home> {
                   ref
                       .read(localePod.notifier)
                       .changeLocale(locale: const Locale('en'));
+                  ref
+                      .read(themecontrollerProvider.notifier)
+                      .changeTheme(theme: ThemeMode.light);
                 },
                 child: const Text("english")),
             FilledButton(
@@ -86,6 +112,9 @@ class _HomeState extends ConsumerState<Home> {
                   ref
                       .read(localePod.notifier)
                       .changeLocale(locale: const Locale('hi'));
+                  ref
+                      .read(themecontrollerProvider.notifier)
+                      .changeTheme(theme: ThemeMode.dark);
                 },
                 child: const Text("Hindi"))
           ],
