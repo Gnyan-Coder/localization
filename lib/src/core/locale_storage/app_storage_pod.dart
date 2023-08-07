@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:localizations/src/core/locale_storage/app_storage.dart';
 
 /// This provider used for App Storage Service class which
